@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/healthcheck_model.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/custom_status_card.dart';
 
 class HealthcheckScreen extends StatefulWidget {
-  const HealthcheckScreen({super.key});
+  final VoidCallback onLogout;
+
+  const HealthcheckScreen({super.key, required this.onLogout});
 
   @override
   State<HealthcheckScreen> createState() => _HealthcheckScreenState();
@@ -25,23 +28,22 @@ class _HealthcheckScreenState extends State<HealthcheckScreen> {
     });
   }
 
+  Future<void> _efetuarLogout() async {
+    await AuthService.logout();
+    widget.onLogout();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = AuthService.currentUser?.user;
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.menu_book_rounded, color: Colors.white),
-            SizedBox(width: 12),
-            Text(
-              'BookFlow App',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ],
+        title: const Text(
+          'BookFlow App',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
         backgroundColor: theme.colorScheme.primary,
@@ -50,7 +52,12 @@ class _HealthcheckScreenState extends State<HealthcheckScreen> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
             onPressed: _atualizarStatus,
-            tooltip: 'Recarregar Status da API',
+            tooltip: 'Recarregar Status',
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.white),
+            onPressed: _efetuarLogout,
+            tooltip: 'Sair do Sistema',
           ),
           const SizedBox(width: 8),
         ],
@@ -61,18 +68,24 @@ class _HealthcheckScreenState extends State<HealthcheckScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              if (user != null) ...[
+                Chip(
+                  avatar: const Icon(Icons.account_circle_rounded),
+                  label: Text(
+                    'Usuário: ${user.nomeExibicao} ${user.isBibliotecario ? "(Bibliotecário)" : ""}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  backgroundColor: Colors.white,
+                ),
+                const SizedBox(height: 24),
+              ],
               const Text(
                 'Status de Integração Back-end',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1D1B20),
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Verificando disponibilidade da API',
-                textAlign: TextAlign.center,
+                'Sessão Autenticada via JWT',
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
               const SizedBox(height: 32),
@@ -82,7 +95,7 @@ class _HealthcheckScreenState extends State<HealthcheckScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CustomStatusCard(
                       title: 'Conectando ao Servidor...',
-                      subtitle: 'Aguardando resposta da API Django REST...',
+                      subtitle: 'Validando credenciais com o servidor...',
                       color: Colors.orange,
                       icon: Icons.sync_rounded,
                       isLoading: true,
@@ -102,12 +115,11 @@ class _HealthcheckScreenState extends State<HealthcheckScreen> {
                       subtitle: '${data.mensagem}\n\n'
                           'Servidor: ${data.servidor}\n'
                           'Versão: ${data.versao}',
-                      color: const Color(0xFF10B981), // Verde Esmeralda
+                      color: const Color(0xFF10B981),
                       icon: Icons.check_circle_rounded,
                       isLoading: false,
                     );
                   }
-
                   return const SizedBox.shrink();
                 },
               ),
