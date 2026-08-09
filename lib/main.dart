@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
+import 'services/auth_service.dart';
 import 'views/healthcheck_screen.dart';
+import 'views/login_screen.dart';
 
 void main() {
   runApp(const BookFlowApp());
 }
 
-class BookFlowApp extends StatelessWidget {
+class BookFlowApp extends StatefulWidget {
   const BookFlowApp({super.key});
+
+  @override
+  State<BookFlowApp> createState() => _BookFlowAppState();
+}
+
+class _BookFlowAppState extends State<BookFlowApp> {
+  void _atualizarEstadoNavegacao() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +31,9 @@ class BookFlowApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
       ),
-      home: const HealthcheckScreen(),
+      home: AuthService.isAuthenticated
+          ? HealthcheckScreen(onLogout: _atualizarEstadoNavegacao)
+          : LoginScreen(onLoginSuccess: _atualizarEstadoNavegacao),
     );
   }
 }
