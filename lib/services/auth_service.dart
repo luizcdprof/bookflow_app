@@ -5,7 +5,8 @@ import '../models/auth_model.dart';
 class AuthService {
   // Alterne a URL base conforme o ambiente (Local ou Produção)
   // static const String baseUrl = 'http://127.0.0.1:8000';
-  static const String baseUrl = 'https://luizdias01.pythonanywhere.com';
+  // static const String baseUrl = 'https://luizdias01.pythonanywhere.com';
+  static const String baseUrl = 'https://bookflow-api-ygvo.onrender.com';
 
   // Guarda os dados da sessão em memória
   static AuthResponseModel? currentUser;
