@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/auth_service.dart';
-import 'views/healthcheck_screen.dart';
+import 'views/livros_screen.dart';
 import 'views/login_screen.dart';
 
 void main() {
@@ -31,8 +31,14 @@ class _BookFlowAppState extends State<BookFlowApp> {
           brightness: Brightness.light,
         ),
       ),
+      // Mapeamento de rotas para fácil navegação
+      routes: {
+        '/login': (context) => LoginScreen(onLoginSuccess: _atualizarEstadoNavegacao),
+        '/livros': (context) => const LivrosScreen(),
+      },
+      // Exibe LivrosScreen se estiver logado, ou LoginScreen se não estiver
       home: AuthService.isAuthenticated
-          ? HealthcheckScreen(onLogout: _atualizarEstadoNavegacao)
+          ? const LivrosScreen()
           : LoginScreen(onLoginSuccess: _atualizarEstadoNavegacao),
     );
   }
